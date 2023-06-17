@@ -17,6 +17,9 @@ function init() {
         createBarChart(initialData);
         createBubbleChart(initialData);
         displayMetadata(initialSampleId, data);
+        
+        // Create the initial gauge chart
+        createGaugeChart(data);
       });
   }
   
