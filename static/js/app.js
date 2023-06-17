@@ -64,9 +64,38 @@ function createBarChart(data) {
   
   
   // Function to create the bubble chart
-  function createBubbleChart(data) {
-    // TODO: Implement code to create the bubble chart
-  }
+function createBubbleChart(data) {
+    // Get the OTU IDs, sample values, and OTU labels for the selected sample
+    var sample = data.samples[0]; // Assuming you want to display the chart for the first sample only
+    var otuIds = sample.otu_ids;
+    var sampleValues = sample.sample_values;
+    var otuLabels = sample.otu_labels;
+  
+    // Create the trace object for the bubble chart
+    var trace = {
+      x: otuIds,
+      y: sampleValues,
+      mode: "markers",
+      marker: {
+        size: sampleValues,
+        color: otuIds,
+        colorscale: "Earth"
+      },
+      text: otuLabels,
+      hovertemplate: "OTU ID: %{x}<br>Sample Value: %{y}<br>OTU Label: %{text}<extra></extra>"
+    };
+  
+    // Create the layout for the bubble chart
+    var layout = {
+      title: "Bacterial Cultures per Sample",
+      xaxis: { title: "OTU ID" },
+      yaxis: { title: "Sample Value" },
+      showlegend: false
+    };
+  
+    // Plot the bubble chart
+    Plotly.newPlot("bubble", [trace], layout);
+  }  
   
   // Function to display the sample metadata
   function displayMetadata(data) {
