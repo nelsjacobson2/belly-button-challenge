@@ -1,27 +1,34 @@
 // Function to initialize the dashboard
 function init() {
-    // Fetch the data from samples.json using D3
+    // Fetch the data
     d3.json("https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json")
-      .then(data => {
-        // Call functions to create the charts and display the sample metadata
-        createBarChart(data);
-        createBubbleChart(data);
-        displayMetadata(data);
-      })
-      .catch(error => {
-        console.log("Error fetching data:", error);
+      .then(function (data) {
+        // Populate the dropdown with sample IDs
+        var dropdown = d3.select("#selDataset");
+        data.names.forEach(function (sampleId) {
+          dropdown.append("option").text(sampleId).property("value", sampleId);
+        });
+  
+        // Get the first sample ID
+        var initialSampleId = data.names[0];
+  
+        // Create the initial charts and display metadata
+        var initialData = data.samples.filter(sample => sample.id === initialSampleId);
+        createBarChart(initialData);
+        createBubbleChart(initialData);
+        displayMetadata(initialSampleId, data);
       });
   }
   
   // Function to create the bar chart
-function createBarChart(data) {
-    // Select the dropdown element
-    var dropdown = d3.select("#selDataset");
+  function createBarChart(data) {
+    // Get the first sample's data
+    var sample = data[0];
   
-    // Get the OTU IDs, sample values, and OTU labels for the selected individual
-    var otuIds = data.samples[0].otu_ids.slice(0, 10).reverse();
-    var sampleValues = data.samples[0].sample_values.slice(0, 10).reverse();
-    var otuLabels = data.samples[0].otu_labels.slice(0, 10).reverse();
+    // Get the top 10 OTUs
+    var otuIds = sample.otu_ids.slice(0, 10).reverse();
+    var sampleValues = sample.sample_values.slice(0, 10).reverse();
+    var otuLabels = sample.otu_labels.slice(0, 10).reverse();
   
     // Create an array of strings for the y-axis labels by adding "OTU" to each OTU ID
     var yLabels = otuIds.map(id => `OTU ${id}`);
@@ -48,30 +55,19 @@ function createBarChart(data) {
   
     // Plot the bar chart
     Plotly.newPlot("bar", data, layout);
-  
-    // Update the dropdown options
-    dropdown.on("change", function () {
-      var selectedValue = this.value;
-      updateCharts(selectedValue, data);
-      updateMetadata(selectedValue, data);
-    });
-  
-    // Initial chart and metadata update
-    var initialSample = dropdown.property("value");
-    updateCharts(initialSample, data);
-    updateMetadata(initialSample, data);
   }
   
-  
   // Function to create the bubble chart
-function createBubbleChart(data) {
-    // Get the OTU IDs, sample values, and OTU labels for the selected sample
-    var sample = data.samples[0]; // Assuming you want to display the chart for the first sample only
+  function createBubbleChart(data) {
+    // Get the first sample's data
+    var sample = data[0];
+  
+    // Get the OTU IDs, sample values, and OTU labels
     var otuIds = sample.otu_ids;
     var sampleValues = sample.sample_values;
     var otuLabels = sample.otu_labels;
   
-    // Create the trace object for the bubble chart
+    // Create the trace for the bubble chart
     var trace = {
       x: otuIds,
       y: sampleValues,
@@ -95,21 +91,45 @@ function createBubbleChart(data) {
   
     // Plot the bubble chart
     Plotly.newPlot("bubble", [trace], layout);
-  }  
-  
-  // Function to display the sample metadata
-  function displayMetadata(data) {
-    // TODO: Implement code to display the sample metadata
   }
   
-  // Function to update the charts and metadata when a new sample is selected
-  function updateCharts(sample, data) {
-    // TODO: Implement code to update the charts based on the selected sample
+ // Function to display sample metadata
+function displayMetadata(sampleId, data) {
+    // Find the metadata for the selected sample
+    var metadata = data.metadata.find(obj => obj.id === parseInt(sampleId));
+  
+    // Select the sample metadata element
+    var sampleMetadataElement = d3.select("#sample-metadata");
+  
+    // Clear any existing metadata
+    sampleMetadataElement.html("");
+  
+    // Loop through each key-value pair in the metadata object
+    Object.entries(metadata).forEach(([key, value]) => {
+      // Append a new paragraph element with the key-value pair
+      sampleMetadataElement
+        .append("p")
+        .text(`${key}: ${value}`);
+    });
   }
   
-  // Function to update the sample metadata when a new sample is selected
-  function updateMetadata(sample, data) {
-    // TODO: Implement code to update the sample metadata based on the selected sample
+  // Function to handle option change
+  function optionChanged(sampleId) {
+    // Fetch the updated data for the selected sample
+    d3.json("https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json")
+      .then(function (data) {
+        // Filter the data for the selected sample
+        var sampleData = data.samples.filter(sample => sample.id === sampleId);
+  
+        // Update the bar chart
+        createBarChart(sampleData);
+  
+        // Update the bubble chart
+        createBubbleChart(sampleData);
+  
+        // Update the sample metadata
+        displayMetadata(sampleId, data);
+      });
   }
   
   // Call the init() function to initialize the dashboard
