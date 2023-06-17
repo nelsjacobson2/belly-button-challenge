@@ -114,7 +114,7 @@ function displayMetadata(sampleId, data) {
   }
   
   // Function to handle option change
-  function optionChanged(sampleId) {
+function optionChanged(sampleId) {
     // Fetch the updated data for the selected sample
     d3.json("https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json")
       .then(function (data) {
@@ -129,8 +129,15 @@ function displayMetadata(sampleId, data) {
   
         // Update the sample metadata
         displayMetadata(sampleId, data);
+  
+        // Get the washing frequency value for the selected sample
+        var washingFrequency = data.metadata.find(obj => obj.id === parseInt(sampleId)).wfreq;
+  
+        // Update the gauge chart
+        createGaugeChart(washingFrequency);
       });
   }
+  
   
   // Call the init() function to initialize the dashboard
   init();
